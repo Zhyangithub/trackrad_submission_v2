@@ -1,15 +1,15 @@
 FROM pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
 
-# ===== 1. 创建非 root 用户 =====
-RUN groupadd -r appuser && useradd -m -r -g appuser appuser
-
 WORKDIR /opt/app
 
-COPY . .
-
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-ENV PYTHONPATH=/opt/app
+COPY algorithm ./algorithm
 
-# ===== 2. 切换用户（关键！）=====
+# ---- create non-root user (REQUIRED) ----
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN chown -R appuser:appuser /opt/app
 USER appuser
+
+ENV PYTHONPATH=/opt/app
